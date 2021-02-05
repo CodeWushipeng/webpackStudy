@@ -1,8 +1,10 @@
 // node路径解析模块，兼容不同操作系统
 const path = require("path");
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
+// 生产环境提取css
+var MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
-  mode: "production",
   context: path.resolve(__dirname), //当前项目目录绝对路径
   entry: "./src/index.js",
   output: {
@@ -23,15 +25,17 @@ module.exports = {
     // },
   },
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    contentBase: path.join(__dirname, "dist"),
     compress: true,
     port: 9000,
-    overlay: {           //用于显示错误和警告
+    overlay: {
+      //用于显示错误和警告
       warnings: true,
-      errors: true
-    }
+      errors: true,
+    },
   },
-  resolve: {         //用于解析文件并赋予别名
+  resolve: {
+    //用于解析文件并赋予别名
     alias: {
       "@": path.resolve(__dirname, "src"),
       api: path.resolve(__dirname, "src/api/"),
@@ -39,17 +43,73 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'My App',
-      template: path.resolve(__dirname, 'src/index.html'),
-      favicon: path.resolve(__dirname, 'src/assets/favicon.ico'),
-    })
+      title: "My App",
+      template: path.resolve(__dirname, "src/index.html"),
+      favicon: path.resolve(__dirname, "src/assets/favicon.ico"),
+    }),
+    new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "style.css",
+    }),
   ],
   module: {
     rules: [
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: [
+          process.env.NODE_ENV !== "production"
+            ? "vue-style-loader"
+            : MiniCssExtractPlugin.loader,
+          "style-loader",
+          "css-loader",
+          "postcss-loader",
+        ],
       },
-    ]
+      {
+        test: /\.scss$/i,
+        use: [
+          {
+            loader: "sass-loader",
+            options: {
+              //处理缩进的scss语法
+              indentedSyntax: true,
+              // sass-loader version >= 8
+              sassOptions: {
+                indentedSyntax: true,
+              },
+            },
+          },
+        ],
+      },
+      {
+        test: /\.js$/,
+        loader: "babel-loader",
+        options: {
+          plugins: [
+            [
+              "import-globals",
+              {
+                process: require.resolve("process/browser"),
+              },
+            ],
+          ],
+        },
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        type: "asset",
+        // 小于 8kb 的文件，将会视为 inline 模块类型，否则会被视为 resource 模块类型。
+        // 自定义设置上限
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8 * 1024,
+          },
+        },
+      },
+      {
+        test: /\.vue$/,
+        loader: "vue-loader",
+      },
+    ],
   },
 };

@@ -1,3 +1,6 @@
-import api from "api/login.js"
-let { name } = api
-console.log(api,name)
+import Vue from "vue";
+import App from "./app.vue";
+
+new Vue({
+  render: (h) => h(App),
+}).$mount("#app");
