@@ -1,17 +1,4 @@
-<template>
-  <div id="app">
-    1111
-  </div>
-</template>
 
-<script>
-console.log(process)
-export default {
-  name: "App",
-};
-</script>
-
-<style>
 *{
   padding: 0;
   margin: 0;
@@ -26,4 +13,6 @@ html,body{
   height: 100%;
   color: red;
 }
-</style>
+
+
+/*# sourceMappingURL=style.css.map*/
